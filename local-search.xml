@@ -8,32 +8,7 @@
     <link href="/2025/04/03/1234/"/>
     <url>/2025/04/03/1234/</url>
     
-    <content type="html"><![CDATA[<p>这是一篇测试文章</p><p><img src="/.com//R-C.png" alt="图片引用方法二"></p><p><img src="/images/DJI_1430_plant3_fake.jpg" alt="图片引用方法三"></p>]]></content>
-    
-    
-    <categories>
-      
-      <category>Java</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>原创</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>测试文章</title>
-    <link href="/2025/04/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/"/>
-    <url>/2025/04/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/</url>
-    
-    <content type="html"><![CDATA[<p>这是一篇测试文章</p><p><img src="/.com//R-C.png" alt="图片引用方法二"></p><p><img src="/images/DJI_1430_plant3_fake.jpg" alt="图片引用方法三"></p>]]></content>
+    <content type="html"><![CDATA[<p>这是一篇测试文章</p><img src="/.com//04/03/1234/R-C.png" class title="图片引用方法一"><p><img src="/.com//R-C.png" alt="图片引用方法二"></p><p><img src="/images/DJI_1430_plant3_fake.jpg" alt="图片引用方法三"></p>]]></content>
     
     
     <categories>
@@ -59,6 +34,31 @@
     <url>/2025/04/03/0403/</url>
     
     <content type="html"><![CDATA[<p>这是一篇测试文章</p><img src="/.com//04/03/0403/R-C.png" class title="图片引用方法一"><p><img src="/.com//R-C.png" alt="图片引用方法二"></p><p><img src="/images/DJI_1430_plant3_fake.jpg" alt="图片引用方法三"></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>Java</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>原创</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>测试文章</title>
+    <link href="/2025/04/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/"/>
+    <url>/2025/04/03/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/</url>
+    
+    <content type="html"><![CDATA[<p>这是一篇测试文章</p><p><img src="/.com//R-C.png" alt="图片引用方法二"></p><p><img src="/images/DJI_1430_plant3_fake.jpg" alt="图片引用方法三"></p>]]></content>
     
     
     <categories>
