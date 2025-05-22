@@ -1,0 +1,472 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Pytorch实战-CIFAR-10图像分类 | wmt319</title><meta name="author" content="Mengtao Wang"><meta name="copyright" content="Mengtao Wang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Pytorch实战-CIFAR-10图像分类近年来，卷积神经网络（CNN）在图像分类领域取得了显著成效。本文将以 CIFAR-10 数据集为例，详细讲解如何使用 PyTorch 构建一个完整的图像分类项目。涵盖数据处理、模型构建、训练与验证、性能评估及可视化分析。  一、CIFAR-10 数据集简介CIFAR-10 是由 Hinton 的学生 Alex Krizhevsky 和 Ilya Suts">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pytorch实战-CIFAR-10图像分类">
+<meta property="og:url" content="https://wmt319.github.io/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/index.html">
+<meta property="og:site_name" content="wmt319">
+<meta property="og:description" content="Pytorch实战-CIFAR-10图像分类近年来，卷积神经网络（CNN）在图像分类领域取得了显著成效。本文将以 CIFAR-10 数据集为例，详细讲解如何使用 PyTorch 构建一个完整的图像分类项目。涵盖数据处理、模型构建、训练与验证、性能评估及可视化分析。  一、CIFAR-10 数据集简介CIFAR-10 是由 Hinton 的学生 Alex Krizhevsky 和 Ilya Suts">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wmt319.github.io/img/avatar.jpg">
+<meta property="article:published_time" content="2025-05-22T08:36:23.000Z">
+<meta property="article:modified_time" content="2025-05-22T08:39:24.109Z">
+<meta property="article:author" content="Mengtao Wang">
+<meta property="article:tag" content="Pytorch">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="CNN">
+<meta property="article:tag" content="分类">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="CIFAR-10">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wmt319.github.io/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Pytorch实战-CIFAR-10图像分类",
+  "url": "https://wmt319.github.io/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/",
+  "image": "https://wmt319.github.io/img/avatar.jpg",
+  "datePublished": "2025-05-22T08:36:23.000Z",
+  "dateModified": "2025-05-22T08:39:24.109Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Mengtao Wang",
+      "url": "https://wmt319.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://wmt319.github.io/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Pytorch实战-CIFAR-10图像分类',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/background.jpg" alt="Logo"><span class="site-name">wmt319</span></a><a class="nav-page-title" href="/"><span class="site-name">Pytorch实战-CIFAR-10图像分类</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Pytorch实战-CIFAR-10图像分类<a class="post-edit-link" href="null_posts/Pytorch实战-CIFAR-10图像分类.md" title="编辑" target="_blank"><i class="fas fa-pencil-alt"></i></a></h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-05-22T08:36:23.000Z" title="发表于 2025-05-22 16:36:23">2025-05-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-05-22T08:39:24.109Z" title="更新于 2025-05-22 16:39:24">2025-05-22</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>13分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Pytorch实战-CIFAR-10图像分类"><a href="#Pytorch实战-CIFAR-10图像分类" class="headerlink" title="Pytorch实战-CIFAR-10图像分类"></a>Pytorch实战-CIFAR-10图像分类</h1><p>近年来，卷积神经网络（CNN）在图像分类领域取得了显著成效。本文将以 CIFAR-10 数据集为例，详细讲解如何使用 PyTorch 构建一个完整的图像分类项目。涵盖数据处理、模型构建、训练与验证、性能评估及可视化分析。</p>
+<hr>
+<h2 id="一、CIFAR-10-数据集简介"><a href="#一、CIFAR-10-数据集简介" class="headerlink" title="一、CIFAR-10 数据集简介"></a>一、CIFAR-10 数据集简介</h2><p>CIFAR-10 是由 Hinton 的学生 Alex Krizhevsky 和 Ilya Sutskever 整理的一个用于识别普适物体的数据集，它包含 60000 张 32 X 32 的 RGB 彩色图片，总共 10 个分类。其中，包括 50000 张用于训练集，10000 张用于测试集。<br><img src="https://gitee.com/wmt0319/image/raw/master/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/%E6%95%B0%E6%8D%AE%E9%9B%86.png" alt="数据集示意图"></p>
+<p><strong>数据集形式：</strong></p>
+<table>
+<thead>
+<tr>
+<th>文件名</th>
+<th>文件类型</th>
+<th>大小</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>readme.html</td>
+<td>HTML文件</td>
+<td>1 KB</td>
+<td>数据集介绍文件</td>
+</tr>
+<tr>
+<td>batches.meta</td>
+<td>META文件</td>
+<td>1 KB</td>
+<td>存储了每个类别的英文名称，可用记事本或其他文本文件阅读器打开查看</td>
+</tr>
+<tr>
+<td>data_batch_1</td>
+<td>二进制文件</td>
+<td>30,309 KB</td>
+<td>训练数据第1批，包含10000张32×32彩色图像及其类别标签</td>
+</tr>
+<tr>
+<td>data_batch_2</td>
+<td>二进制文件</td>
+<td>30,308 KB</td>
+<td>训练数据第2批，包含10000张32×32彩色图像及其类别标签</td>
+</tr>
+<tr>
+<td>data_batch_3</td>
+<td>二进制文件</td>
+<td>30,309 KB</td>
+<td>训练数据第3批，包含10000张32×32彩色图像及其类别标签</td>
+</tr>
+<tr>
+<td>data_batch_4</td>
+<td>二进制文件</td>
+<td>30,309 KB</td>
+<td>训练数据第4批，包含10000张32×32彩色图像及其类别标签</td>
+</tr>
+<tr>
+<td>data_batch_5</td>
+<td>二进制文件</td>
+<td>30,309 KB</td>
+<td>训练数据第5批，包含10000张32×32彩色图像及其类别标签</td>
+</tr>
+<tr>
+<td>test_batch</td>
+<td>二进制文件</td>
+<td>30,309 KB</td>
+<td>测试数据，包含10000张测试图像及其类别标签</td>
+</tr>
+</tbody></table>
+<p><strong>数据集特点：</strong></p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>图像数量</td>
+<td>60,000 张</td>
+</tr>
+<tr>
+<td>训练集大小</td>
+<td>50,000 张</td>
+</tr>
+<tr>
+<td>测试集大小</td>
+<td>10,000 张</td>
+</tr>
+<tr>
+<td>图像尺寸</td>
+<td>32×32 像素</td>
+</tr>
+<tr>
+<td>通道数</td>
+<td>3（RGB）</td>
+</tr>
+<tr>
+<td>分类数量</td>
+<td>10 类</td>
+</tr>
+<tr>
+<td>每类样本数量</td>
+<td>6,000 张</td>
+</tr>
+<tr>
+<td>标签格式</td>
+<td>整数（0~9）</td>
+</tr>
+<tr>
+<td>常用用途</td>
+<td>图像分类、迁移学习、图像增强实验</td>
+</tr>
+</tbody></table>
+<p><strong>具体类别：</strong></p>
+<table>
+<thead>
+<tr>
+<th>类别编号</th>
+<th>类别名称（英文）</th>
+<th>含义说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>airplane</td>
+<td>飞机</td>
+</tr>
+<tr>
+<td>1</td>
+<td>automobile</td>
+<td>汽车</td>
+</tr>
+<tr>
+<td>2</td>
+<td>bird</td>
+<td>鸟</td>
+</tr>
+<tr>
+<td>3</td>
+<td>cat</td>
+<td>猫</td>
+</tr>
+<tr>
+<td>4</td>
+<td>deer</td>
+<td>鹿</td>
+</tr>
+<tr>
+<td>5</td>
+<td>dog</td>
+<td>狗</td>
+</tr>
+<tr>
+<td>6</td>
+<td>frog</td>
+<td>青蛙</td>
+</tr>
+<tr>
+<td>7</td>
+<td>horse</td>
+<td>马</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ship</td>
+<td>船</td>
+</tr>
+<tr>
+<td>9</td>
+<td>truck</td>
+<td>卡车（货车）</td>
+</tr>
+</tbody></table>
+<p>CIFAR-10数据集下载：</p>
+<ul>
+<li><strong>Pytorch</strong>：<code>torchvision.datasets.CIFAR10(root=&#39;./dataset&#39;, train=True/False, download=True)</code></li>
+<li><strong>官网下载</strong>：<a target="_blank" rel="noopener" href="http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz">http://www.cs.toronto.edu/~kriz&#x2F;cifar-10-python.tar.gz</a></li>
+<li><strong>Github</strong>：<a target="_blank" rel="noopener" href="https://github.com/wmt319/CIFAR-10_CNN/dataset">https://github.com/wmt319/CIFAR-10_CNN&#x2F;dataset</a></li>
+</ul>
+<hr>
+<h2 id="二、环境配置与依赖"><a href="#二、环境配置与依赖" class="headerlink" title="二、环境配置与依赖"></a>二、环境配置与依赖</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建虚拟环境并安装依赖</span></span><br><span class="line">pip install torch torchvision matplotlib numpy pandas scikit-learn</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> datasets, transforms</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report, confusion_matrix, ConfusionMatrixDisplay</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>提示</strong>：推荐在 GPU 环境下执行（CUDA 可用时优先使用）。</p>
+</blockquote>
+<hr>
+<h2 id="三、数据预处理与可视化"><a href="#三、数据预处理与可视化" class="headerlink" title="三、数据预处理与可视化"></a>三、数据预处理与可视化</h2><p>在训练 CNN 模型之前，数据预处理是至关重要的一步。合理的归一化和标准化可以使得模型更快收敛、性能更稳定；而数据可视化不仅能帮助我们直观了解数据分布，还能及时发现异常样本。</p>
+<h3 id="3-1-归一化与标准化"><a href="#3-1-归一化与标准化" class="headerlink" title="3.1 归一化与标准化"></a>3.1 归一化与标准化</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">transform = transforms.Compose([</span><br><span class="line">    transforms.ToTensor(),</span><br><span class="line">    transforms.Normalize((<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>), (<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))  <span class="comment"># 全局均值与方差</span></span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**ToTensor()**：将 PIL 图像或 NumPy 数组转换为形状为 [C, H, W] 的浮点型张量，并将像素值归一化到 [0,1] 区间；</li>
+<li>**Normalize()**：对每个通道执行 (x - mean) &#x2F; std，这些值是根据整个训练集计算得到的，全局标准化有助于梯度更稳定。</li>
+</ul>
+<blockquote>
+<p><strong>Tip</strong>：如果你使用自己的数据集，需要先利用 torch.mean 和 torch.std 统计均值与方差，或在可视化工具中直观估计数据分布。</p>
+</blockquote>
+<h3 id="3-2-数据加载"><a href="#3-2-数据加载" class="headerlink" title="3.2 数据加载"></a>3.2 数据加载</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">train_dataset = datasets.CIAFR10(root=<span class="string">&#x27;./dataset&#x27;</span>, train=<span class="literal">True</span>, download=<span class="literal">False</span>, transform=transform)</span><br><span class="line">test_dataset = datasets.CIFAR10(root=<span class="string">&#x27;./dataset&#x27;</span>, train=<span class="literal">False</span>, download=<span class="literal">False</span>, transform=transform)</span><br><span class="line">train_loader = DataLoader(dataset=train_dataset, batch_size=<span class="number">64</span>, shuffle=<span class="literal">True</span>, num_workers=<span class="number">0</span>)</span><br><span class="line">test_loader = DataLoader(dataset=test_dataset, batch_size=<span class="number">64</span>, shuffle=<span class="literal">False</span>,num_workers=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>root</strong>：指定本地数据存储路径。例如 .&#x2F;dataset 文件夹下会生成 MNIST 子目录；</li>
+<li><strong>train</strong>：布尔值，True 表示加载训练集，False 表示加载测试集；</li>
+<li><strong>download</strong>：布尔值，若本地 root 路径下不存在数据，则自动从网络下载(可能需要魔法上网)；若已下载可设为 False；</li>
+<li><strong>shuffle</strong>：训练时打乱数据顺序，有助于打破样本间关联性，提升泛化；</li>
+<li><strong>batch_size</strong>：每批次读取样本数，平衡训练稳定性和显存使用；</li>
+<li><strong>num_workers</strong>：用于数据加载的子进程数量，可加速 I&#x2F;O，但需与系统资源匹配。</li>
+</ul>
+<blockquote>
+<p><strong>注意</strong>：在 Windows 下使用 num_workers &gt; 0 有时会导致多进程启动延迟，可设置为 0 避免兼容性问题。</p>
+</blockquote>
+<h3 id="3-3-样本可视化"><a href="#3-3-样本可视化" class="headerlink" title="3.3 样本可视化"></a>3.3 样本可视化</h3><p>在正式训练前，通过可视化部分样本，可以帮助我们确认标签是否正确、图像是否有噪声或畸变，以及预处理是否生效。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 展示 10 个样本</span></span><br><span class="line">class_names = [<span class="string">&#x27;airplane&#x27;</span>, <span class="string">&#x27;automobile&#x27;</span>, <span class="string">&#x27;bird&#x27;</span>, <span class="string">&#x27;cat&#x27;</span>, <span class="string">&#x27;deer&#x27;</span>, <span class="string">&#x27;dog&#x27;</span>, <span class="string">&#x27;frog&#x27;</span>, <span class="string">&#x27;horse&#x27;</span>, <span class="string">&#x27;ship&#x27;</span>, <span class="string">&#x27;truck&#x27;</span>]</span><br><span class="line">data_iter = <span class="built_in">iter</span>(train_loader)</span><br><span class="line">images, labels = <span class="built_in">next</span>(data_iter)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">12</span>, <span class="number">6</span>))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">    img = (images[i] * <span class="number">0.5</span> + <span class="number">0.5</span>)  <span class="comment"># 反归一化</span></span><br><span class="line">    img = img.permute(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>).numpy()  <span class="comment"># CHW -&gt; HWC</span></span><br><span class="line"></span><br><span class="line">    plt.subplot(<span class="number">2</span>, <span class="number">5</span>, i+<span class="number">1</span>)</span><br><span class="line">    plt.imshow(img)</span><br><span class="line">    plt.title(class_names[labels[i].item()])</span><br><span class="line">    plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.suptitle(<span class="string">&quot;CIFAR-10&quot;</span>, fontsize=<span class="number">16</span>)</span><br><span class="line">plt.tight_layout()</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/wmt0319/image/raw/master/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/CIFAR-10%E6%95%B0%E6%8D%AE%E9%9B%86.png" alt="样本可视化"></p>
+<hr>
+<h2 id="四、CNN-模型架构与实现"><a href="#四、CNN-模型架构与实现" class="headerlink" title="四、CNN 模型架构与实现"></a>四、CNN 模型架构与实现</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CIFAR10_CNN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(CIFAR10_CNN, <span class="variable language_">self</span>).__init__()</span><br><span class="line">        <span class="variable language_">self</span>.net = nn.Sequential(</span><br><span class="line">            nn.Conv2d(<span class="number">3</span>, <span class="number">6</span>,<span class="number">5</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>, <span class="number">2</span>),</span><br><span class="line">            nn.Conv2d(<span class="number">6</span>, <span class="number">16</span>, <span class="number">5</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>, <span class="number">2</span>),</span><br><span class="line">            nn.Flatten(),</span><br><span class="line">            nn.Linear(<span class="number">16</span> * <span class="number">5</span> * <span class="number">5</span>, <span class="number">120</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.Linear(<span class="number">120</span>, <span class="number">84</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.Linear(<span class="number">84</span>, <span class="number">10</span>),</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = <span class="variable language_">self</span>.net(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型实例化与设备部署</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line">model = CIFAR10_CNN().to(device)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 torchinfo 输出模型摘要</span></span><br><span class="line"><span class="keyword">from</span> torchinfo <span class="keyword">import</span> summary</span><br><span class="line">summary(model, (<span class="number">64</span>, <span class="number">3</span>, <span class="number">32</span>, <span class="number">32</span>))</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>卷积层 conv1</strong>：</p>
+<ul>
+<li><code>nn.Conv2d(3, 6, 5)</code>：输入为 3 通道彩色图像，使用 6 个 5×5 的卷积核进行特征提取；</li>
+<li><code>nn.ReLU()</code>：添加非线性激活函数，引入模型表达能力；</li>
+<li><code>nn.MaxPool2d(2, 2)</code>：使用 2×2 的池化窗口下采样，将图像尺寸从 32×32 缩小为14×14。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>📐 卷积输出尺寸计算（不使用 padding，stride&#x3D;1）：</p>
+<ul>
+<li>Conv1 输出：$(32 - 5 + 1) &#x3D; 28 \Rightarrow 28 × 28 × 6$</li>
+<li>Pool1 输出：$28 &#x2F; 2 &#x3D; 14 \Rightarrow 14 × 14 × 6$</li>
+</ul>
+</blockquote>
+<ul>
+<li><p><strong>卷积层 conv2</strong>：</p>
+<ul>
+<li><code>nn.Conv2d(6, 16, 5)</code>：将前一层的 6 通道输出扩展为 16 个高层特征通道；</li>
+<li><code>nn.ReLU()</code>：继续添加非线性；</li>
+<li><code>nn.MaxPool2d(2, 2)</code>：再一次下采样，进一步降低空间维度。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>📐 尺寸变化：</p>
+<ul>
+<li>Conv2 输出：$(14 - 5 + 1) &#x3D; 10 \Rightarrow 10 × 10 × 16$</li>
+<li>Pool2 输出：$10 &#x2F; 2 &#x3D; 5 \Rightarrow 5 × 5 × 16$</li>
+</ul>
+</blockquote>
+<ul>
+<li><p><strong>全连接模块 fc</strong>：</p>
+<ul>
+<li><code>nn.Flatten()</code>：将 16 × 5 × 5 的三维张量展平成 400 维向量；</li>
+<li><code>nn.Linear(400, 120)</code>：第一层全连接层，映射到 120 维；</li>
+<li><code>nn.ReLU()</code>：继续使用 ReLU 激活；</li>
+<li><code>nn.Linear(120, 84)</code>：第二层全连接层，进一步学习紧凑表示；</li>
+<li><code>nn.Linear(84, 10)</code>：输出 10 维向量，每一维对应一个 CIFAR-10 类别的得分。</li>
+</ul>
+</li>
+<li><p><strong>模型摘要</strong>：</p>
+<ul>
+<li><code>summary(model, input_size=(64,1,28,28))</code> 可直观打印各层输出形状与参数量，便于调试与性能评估；</li>
+</ul>
+</li>
+</ul>
+<p>📋 模型各层形状与参数如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">==========================================================================================</span><br><span class="line">Layer (type:depth-idx)                   Output Shape              Param #</span><br><span class="line">==========================================================================================</span><br><span class="line">CIFAR10_CNN                              [64, 10]                  --</span><br><span class="line">├─Sequential: 1-1                        [64, 6, 14, 14]           --</span><br><span class="line">│    └─Conv2d: 2-1                       [64, 6, 28, 28]           456</span><br><span class="line">│    └─ReLU: 2-2                         [64, 6, 28, 28]           --</span><br><span class="line">│    └─MaxPool2d: 2-3                    [64, 6, 14, 14]           --</span><br><span class="line">├─Sequential: 1-2                        [64, 16, 5, 5]            --</span><br><span class="line">│    └─Conv2d: 2-4                       [64, 16, 10, 10]          2,416</span><br><span class="line">│    └─ReLU: 2-5                         [64, 16, 10, 10]          --</span><br><span class="line">│    └─MaxPool2d: 2-6                    [64, 16, 5, 5]            --</span><br><span class="line">├─Sequential: 1-3                        [64, 10]                  --</span><br><span class="line">│    └─Flatten: 2-7                      [64, 400]                 --</span><br><span class="line">│    └─Linear: 2-8                       [64, 120]                 48,120</span><br><span class="line">│    └─ReLU: 2-9                         [64, 120]                 --</span><br><span class="line">│    └─Linear: 2-10                      [64, 84]                  10,164</span><br><span class="line">│    └─ReLU: 2-11                        [64, 84]                  --</span><br><span class="line">│    └─Linear: 2-12                      [64, 10]                  850</span><br><span class="line">==========================================================================================</span><br><span class="line">Total params: 62,006</span><br><span class="line">Trainable params: 62,006</span><br><span class="line">Non-trainable params: 0</span><br><span class="line">Total mult-adds (M): 42.13</span><br><span class="line">==========================================================================================</span><br><span class="line">Input size (MB): 0.79</span><br><span class="line">Forward/backward pass size (MB): 3.34</span><br><span class="line">Params size (MB): 0.25</span><br><span class="line">Estimated Total Size (MB): 4.37</span><br><span class="line">==========================================================================================</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、训练策略与超参数"><a href="#五、训练策略与超参数" class="headerlink" title="五、训练策略与超参数"></a>五、训练策略与超参数</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">criterion = nn.CrossEntropyLoss()</span><br><span class="line">optimizer = optim.SGD(model.parameters(), lr=<span class="number">0.01</span>, momentum=<span class="number">0.9</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>损失函数</strong>：交叉熵损失是多分类任务的标准选择，可衡量模型输出的概率分布与真实标签分布之间的差异；</li>
+<li><strong>优化器</strong>：SGD具有良好的稳定性和可解释性；</li>
+<li><strong>学习率调度</strong>：每 20 个 epoch 衰减 10 倍；</li>
+<li><strong>动量</strong>：momentum&#x3D;0.9 能加速收敛并抑制震荡。</li>
+</ul>
+<hr>
+<h2 id="六、训练与评估"><a href="#六、训练与评估" class="headerlink" title="六、训练与评估"></a>六、训练与评估</h2><h3 id="6-1-训练循环"><a href="#6-1-训练循环" class="headerlink" title="6.1 训练循环"></a>6.1 训练循环</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">model, train_loader, criterion, optimizer, epoch</span>):</span><br><span class="line">    model.train()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epoch):</span><br><span class="line">        running_loss = <span class="number">0.0</span></span><br><span class="line">        <span class="keyword">for</span> batch_idx, data <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader):</span><br><span class="line">            inputs, labels = data[<span class="number">0</span>].to(device), data[<span class="number">1</span>].to(device)</span><br><span class="line">            optimizer.zero_grad()</span><br><span class="line">            outputs = model(inputs)</span><br><span class="line">            loss = criterion(outputs, labels)</span><br><span class="line">            loss.backward()</span><br><span class="line">            optimizer.step()</span><br><span class="line">            running_loss += loss.item()</span><br><span class="line">            <span class="keyword">if</span> batch_idx % <span class="number">100</span> == <span class="number">0</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&#x27;Train Epoch: &#123;&#125; [&#123;&#125;/&#123;&#125; (&#123;:.0f&#125;%)]\tLoss: &#123;:.6f&#125;&#x27;</span>.<span class="built_in">format</span>(</span><br><span class="line">                    i, batch_idx * <span class="built_in">len</span>(inputs), <span class="built_in">len</span>(train_loader.dataset),</span><br><span class="line">                    <span class="number">100.</span> * batch_idx / <span class="built_in">len</span>(train_loader), running_loss / <span class="number">100</span>))</span><br><span class="line">                running_loss = <span class="number">0.0</span></span><br><span class="line">        <span class="keyword">if</span> i % <span class="number">10</span> == <span class="number">0</span>:</span><br><span class="line">            torch.save(model.state_dict(), <span class="string">&#x27;./checkpoints/model_&#123;&#125;.pth&#x27;</span>.<span class="built_in">format</span>(i))</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;Model saved as model_&#123;&#125;.pth&#x27;</span>.<span class="built_in">format</span>(i))</span><br><span class="line"></span><br><span class="line">train(model, train_loader, criterion, optimizer, <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/wmt0319/image/raw/master/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/%E8%AE%AD%E7%BB%83%E8%BF%87%E7%A8%8B%E5%9B%BE.png" alt="训练过程图"></p>
+<h3 id="6-2-精确率"><a href="#6-2-精确率" class="headerlink" title="6.2 精确率"></a>6.2 精确率</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">model, test_loader</span>):</span><br><span class="line">    model.<span class="built_in">eval</span>()</span><br><span class="line">    class_correct = <span class="built_in">list</span>(<span class="number">0.</span> <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>))</span><br><span class="line">    class_total = <span class="built_in">list</span>(<span class="number">0.</span> <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        <span class="keyword">for</span> images, labels <span class="keyword">in</span> test_loader:</span><br><span class="line">            images, labels = images.to(device), labels.to(device)</span><br><span class="line">            outputs = model(images)</span><br><span class="line">            _, predicted = torch.<span class="built_in">max</span>(outputs, <span class="number">1</span>)</span><br><span class="line">            c = (predicted == labels).squeeze()</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(images)):</span><br><span class="line">                label = labels[i].item()  <span class="comment"># 转换为 Python 整数</span></span><br><span class="line">                class_correct[label] += c[i].item()</span><br><span class="line">                class_total[label] += <span class="number">1</span></span><br><span class="line">                </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">        <span class="keyword">if</span> class_total[i] &gt; <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&#x27;Accuracy of <span class="subst">&#123;classes[i]:5s&#125;</span> : <span class="subst">&#123;<span class="number">100</span> * class_correct[i]/class_total[i]:<span class="number">2.0</span>f&#125;</span>%&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&#x27;Accuracy of <span class="subst">&#123;classes[i]:5s&#125;</span> : N/A&#x27;</span>)</span><br><span class="line">test(model, test_loader)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Accuracy of plane : 70%</span><br><span class="line">Accuracy of car   : 76%</span><br><span class="line">Accuracy of bird  : 45%</span><br><span class="line">Accuracy of cat   : 46%</span><br><span class="line">Accuracy of deer  : 44%</span><br><span class="line">Accuracy of dog   : 48%</span><br><span class="line">Accuracy of frog  : 81%</span><br><span class="line">Accuracy of horse : 69%</span><br><span class="line">Accuracy of ship  : 79%</span><br><span class="line">Accuracy of truck : 69%</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-混淆矩阵与分类报告"><a href="#6-3-混淆矩阵与分类报告" class="headerlink" title="6.3 混淆矩阵与分类报告"></a>6.3 混淆矩阵与分类报告</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">classes = (<span class="string">&#x27;plane&#x27;</span>, <span class="string">&#x27;car&#x27;</span>, <span class="string">&#x27;bird&#x27;</span>, <span class="string">&#x27;cat&#x27;</span>, <span class="string">&#x27;deer&#x27;</span>, <span class="string">&#x27;dog&#x27;</span>, <span class="string">&#x27;frog&#x27;</span>, <span class="string">&#x27;horse&#x27;</span>, <span class="string">&#x27;ship&#x27;</span>, <span class="string">&#x27;truck&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> confusion_matrix, ConfusionMatrixDisplay, classification_report</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1) 在 test 函数里收集</span></span><br><span class="line">y_trues, y_preds = [], []</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="keyword">for</span> x, y <span class="keyword">in</span> test_loader:</span><br><span class="line">        x = x.to(device)</span><br><span class="line">        logits = model(x)</span><br><span class="line">        preds = logits.argmax(dim=<span class="number">1</span>).cpu()</span><br><span class="line">        y_preds.extend(preds.numpy())</span><br><span class="line">        y_trues.extend(y.numpy())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2) 计算并打印报告</span></span><br><span class="line"><span class="built_in">print</span>(classification_report(y_trues, y_preds, target_names=classes))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3) 混淆矩阵</span></span><br><span class="line">cm = confusion_matrix(y_trues, y_preds)</span><br><span class="line">disp = ConfusionMatrixDisplay(confusion_matrix=cm,</span><br><span class="line">                              display_labels=classes)</span><br><span class="line">disp.plot(cmap=plt.cm.Blues)</span><br><span class="line">plt.xticks(rotation=<span class="number">45</span>)</span><br><span class="line">plt.title(<span class="string">&quot;Confusion Matrix&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">       plane       0.67      0.70      0.69      1000</span><br><span class="line">         car       0.72      0.76      0.74      1000</span><br><span class="line">        bird       0.60      0.45      0.52      1000</span><br><span class="line">         cat       0.42      0.46      0.44      1000</span><br><span class="line">        deer       0.62      0.44      0.52      1000</span><br><span class="line">         dog       0.55      0.48      0.51      1000</span><br><span class="line">        frog       0.60      0.81      0.69      1000</span><br><span class="line">       horse       0.70      0.69      0.70      1000</span><br><span class="line">        ship       0.70      0.79      0.74      1000</span><br><span class="line">       truck       0.68      0.69      0.68      1000</span><br><span class="line"></span><br><span class="line">    accuracy                           0.63     10000</span><br><span class="line">   macro avg       0.63      0.63      0.62     10000</span><br><span class="line">weighted avg       0.63      0.63      0.62     10000</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/wmt0319/image/raw/master/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5.png" alt="混淆矩阵"></p>
+<h3 id="6-4-ROC曲线图"><a href="#6-4-ROC曲线图" class="headerlink" title="6.4 ROC曲线图"></a>6.4 ROC曲线图</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> roc_curve, auc</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> label_binarize</span><br><span class="line"></span><br><span class="line"><span class="comment"># 假设有 10 类</span></span><br><span class="line">n_classes = <span class="number">10</span></span><br><span class="line">y_trues_bin = label_binarize(y_trues, classes=<span class="built_in">list</span>(<span class="built_in">range</span>(n_classes)))</span><br><span class="line">y_scores    = []  <span class="comment"># 用 softmax 后的概率</span></span><br><span class="line"></span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="keyword">for</span> x, _ <span class="keyword">in</span> test_loader:</span><br><span class="line">        x = x.to(device)</span><br><span class="line">        logits = model(x)</span><br><span class="line">        probs  = torch.softmax(logits, dim=<span class="number">1</span>).cpu().numpy()</span><br><span class="line">        y_scores.append(probs)</span><br><span class="line">y_scores = np.vstack(y_scores)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 针对每一类画 ROC</span></span><br><span class="line">plt.figure()</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n_classes):</span><br><span class="line">    fpr, tpr, _ = roc_curve(y_trues_bin[:, i], y_scores[:, i])</span><br><span class="line">    roc_auc = auc(fpr, tpr)</span><br><span class="line">    plt.plot(fpr, tpr, label=<span class="string">f&#x27;Class <span class="subst">&#123;classes[i]&#125;</span> (AUC = <span class="subst">&#123;roc_auc:<span class="number">.2</span>f&#125;</span>)&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.plot([<span class="number">0</span>,<span class="number">1</span>], [<span class="number">0</span>,<span class="number">1</span>], <span class="string">&#x27;k--&#x27;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;False Positive Rate&#x27;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;True Positive Rate&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;ROC Curve (one-vs-rest)&#x27;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&#x27;lower right&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/wmt0319/image/raw/master/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/ROC.png" alt="ROC曲线图"></p>
+<blockquote>
+<p>📌 <strong>解释</strong>：</p>
+<ul>
+<li>采用 One-vs-Rest 方法，对每个类分别绘制 ROC 曲线。</li>
+<li><code>AUC</code> 越高，说明该类的分类能力越强。</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="七、完整代码"><a href="#七、完整代码" class="headerlink" title="七、完整代码"></a>七、完整代码</h2><p>完整代码可以在我的GitHub仓库查看：<a target="_blank" rel="noopener" href="https://github.com/wmt319/CIIFAR-10_CNN">https://github.com/wmt319/CIIFAR-10_CNN</a></p>
+<blockquote>
+<p>💻 <strong>提示</strong>：<strong>如果需要数据集可私信或者评论！！！</strong><br><strong>如有问题，欢迎在评论区留言讨论！</strong></p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://wmt319.github.io">Mengtao Wang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://wmt319.github.io/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/">https://wmt319.github.io/2025/05/22/Pytorch实战-CIFAR-10图像分类/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://wmt319.github.io" target="_blank">wmt319</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Pytorch/">Pytorch</a><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a><a class="post-meta__tags" href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a><a class="post-meta__tags" href="/tags/CNN/">CNN</a><a class="post-meta__tags" href="/tags/%E5%88%86%E7%B1%BB/">分类</a><a class="post-meta__tags" href="/tags/Python/">Python</a><a class="post-meta__tags" href="/tags/CIFAR-10/">CIFAR-10</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-MNIST%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/" title="Pytorch实战-MNIST手写数字识别"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Pytorch实战-MNIST手写数字识别</div></div><div class="info-2"><div class="info-item-1">Pytorch实战-MNIST手写数字识别 在当今 AI 驱动的时代，卷积神经网络（CNN）以其卓越的特征提取能力成为计算机视觉领域的核心架构。本文将深入剖析 CNN 在 MNIST 手写数字识别任务中的应用，涵盖从数据预处理、网络设计、训练策略到性能可视化的全流程，实现从理论到实战的无缝衔接。   一、理论背景与动机1.1 卷积神经网络（CNN）的核心原理 局部感连接：在传统神经网络中，神经元之间是全连接的，这意味着每个神经元都与下一层的所有神经元相连，参数数量巨大，计算复杂度高。而 CNN 的卷积层中，每个神经元仅与输入数据的一个局部区域相连，例如在处理图像时，一个神经元只感受图像中的一个小区域（如 3x3 的像素区域），这种局部连接的方式大大减少了参数数量，降低了计算量 。比如，对于一张 100x100 像素的图像，如果使用全连接层，假设下一层有 100 个神经元，那么仅这一层的参数数量就达到 100x100x100 &#x3D; 100 万；而采用 3x3 的卷积核进行局部连接，参数数量仅为 3x3 &#x3D; 9，极大地减少了计算负担。 权值共享：同一个卷积核在整个输...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-MNIST/" title="Pytorch实战-MNIST手写数字识别"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-22</div><div class="info-item-2">Pytorch实战-MNIST手写数字识别</div></div><div class="info-2"><div class="info-item-1">Pytorch实战-MNIST手写数字识别 在当今 AI 驱动的时代，卷积神经网络（CNN）以其卓越的特征提取能力成为计算机视觉领域的核心架构。本文将深入剖析 CNN 在 MNIST 手写数字识别任务中的应用，涵盖从数据预处理、网络设计、训练策略到性能可视化的全流程，实现从理论到实战的无缝衔接。   一、理论背景与动机1.1 卷积神经网络（CNN）的核心原理 局部感连接：在传统神经网络中，神经元之间是全连接的，这意味着每个神经元都与下一层的所有神经元相连，参数数量巨大，计算复杂度高。而 CNN 的卷积层中，每个神经元仅与输入数据的一个局部区域相连，例如在处理图像时，一个神经元只感受图像中的一个小区域（如 3x3 的像素区域），这种局部连接的方式大大减少了参数数量，降低了计算量 。比如，对于一张 100x100 像素的图像，如果使用全连接层，假设下一层有 100 个神经元，那么仅这一层的参数数量就达到 100x100x100 &#x3D; 100 万；而采用 3x3 的卷积核进行局部连接，参数数量仅为 3x3 &#x3D; 9，极大地减少了计算负担。 权值共享：同一个卷积核在整个输...</div></div></div></a><a class="pagination-related" href="/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-MNIST%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/" title="Pytorch实战-MNIST手写数字识别"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-22</div><div class="info-item-2">Pytorch实战-MNIST手写数字识别</div></div><div class="info-2"><div class="info-item-1">Pytorch实战-MNIST手写数字识别 在当今 AI 驱动的时代，卷积神经网络（CNN）以其卓越的特征提取能力成为计算机视觉领域的核心架构。本文将深入剖析 CNN 在 MNIST 手写数字识别任务中的应用，涵盖从数据预处理、网络设计、训练策略到性能可视化的全流程，实现从理论到实战的无缝衔接。   一、理论背景与动机1.1 卷积神经网络（CNN）的核心原理 局部感连接：在传统神经网络中，神经元之间是全连接的，这意味着每个神经元都与下一层的所有神经元相连，参数数量巨大，计算复杂度高。而 CNN 的卷积层中，每个神经元仅与输入数据的一个局部区域相连，例如在处理图像时，一个神经元只感受图像中的一个小区域（如 3x3 的像素区域），这种局部连接的方式大大减少了参数数量，降低了计算量 。比如，对于一张 100x100 像素的图像，如果使用全连接层，假设下一层有 100 个神经元，那么仅这一层的参数数量就达到 100x100x100 &#x3D; 100 万；而采用 3x3 的卷积核进行局部连接，参数数量仅为 3x3 &#x3D; 9，极大地减少了计算负担。 权值共享：同一个卷积核在整个输...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Mengtao Wang</div><div class="author-info-description">欢迎来到我的个人博客</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/wmt319"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/wmt319" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:3422067137@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a><a class="social-icon" href="/123" target="_blank" title="WeChat"><i class="fab fa-weixin" style="color: #1aad19;"></i></a><a class="social-icon" href="/3422067137" target="_blank" title="QQ"><i class="fab fa-qq" style="color: #1aad19;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB"><span class="toc-number">1.</span> <span class="toc-text">Pytorch实战-CIFAR-10图像分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81CIFAR-10-%E6%95%B0%E6%8D%AE%E9%9B%86%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">一、CIFAR-10 数据集简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BE%9D%E8%B5%96"><span class="toc-number">1.2.</span> <span class="toc-text">二、环境配置与依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86%E4%B8%8E%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="toc-number">1.3.</span> <span class="toc-text">三、数据预处理与可视化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%BD%92%E4%B8%80%E5%8C%96%E4%B8%8E%E6%A0%87%E5%87%86%E5%8C%96"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 归一化与标准化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 数据加载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%A0%B7%E6%9C%AC%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 样本可视化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81CNN-%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.4.</span> <span class="toc-text">四、CNN 模型架构与实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5%E4%B8%8E%E8%B6%85%E5%8F%82%E6%95%B0"><span class="toc-number">1.5.</span> <span class="toc-text">五、训练策略与超参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%AE%AD%E7%BB%83%E4%B8%8E%E8%AF%84%E4%BC%B0"><span class="toc-number">1.6.</span> <span class="toc-text">六、训练与评估</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 训练循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E7%B2%BE%E7%A1%AE%E7%8E%87"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 精确率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5%E4%B8%8E%E5%88%86%E7%B1%BB%E6%8A%A5%E5%91%8A"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 混淆矩阵与分类报告</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-4-ROC%E6%9B%B2%E7%BA%BF%E5%9B%BE"><span class="toc-number">1.6.4.</span> <span class="toc-text">6.4 ROC曲线图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="toc-number">1.7.</span> <span class="toc-text">七、完整代码</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-CIFAR-10%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/" title="Pytorch实战-CIFAR-10图像分类">Pytorch实战-CIFAR-10图像分类</a><time datetime="2025-05-22T08:36:23.000Z" title="发表于 2025-05-22 16:36:23">2025-05-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-MNIST/" title="Pytorch实战-MNIST手写数字识别">Pytorch实战-MNIST手写数字识别</a><time datetime="2025-05-22T08:01:35.000Z" title="发表于 2025-05-22 16:01:35">2025-05-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/22/Pytorch%E5%AE%9E%E6%88%98-MNIST%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/" title="Pytorch实战-MNIST手写数字识别">Pytorch实战-MNIST手写数字识别</a><time datetime="2025-05-22T08:01:35.000Z" title="发表于 2025-05-22 16:01:35">2025-05-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/22/hello-world/" title="Hello World">Hello World</a><time datetime="2025-05-22T03:29:38.116Z" title="发表于 2025-05-22 11:29:38">2025-05-22</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;2025 By Mengtao Wang</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.4.0-b2</a></span></div><div class="footer_custom_text">Hi, welcome to my <a target="_blank" rel="noopener" href="https://butterfly.js.org/">blog</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
